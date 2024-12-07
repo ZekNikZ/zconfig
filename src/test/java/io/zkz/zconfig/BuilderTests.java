@@ -1,16 +1,13 @@
 package io.zkz.zconfig;
 
+import io.zkz.zconfig.conversion.Serializer;
 import io.zkz.zconfig.spec.ConfigSpec;
-import io.zkz.zconfig.spec.properties.BasicPropertySpec;
-import io.zkz.zconfig.spec.properties.ListPropertySpec;
+import io.zkz.zconfig.spec.builders.PropertySpecBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class BuilderTests {
@@ -99,6 +96,22 @@ public class BuilderTests {
                             .after(Instant.now())
                     )
             )
+            .addProperty(type ->
+                type.Delegated("myDelegatedProperty", TestDelegateObject.class, new Serializer<>() {
+                        @Override
+                        public TestDelegateObject deserialize(String value) {
+                            return new TestDelegateObject(value);
+                        }
+
+                        @Override
+                        public String serialize(TestDelegateObject value) {
+                            return value.message();
+                        }
+                    }, PropertySpecBuilder.SubTypes::String)
+                    .validator(
+                        x -> x.message.startsWith("ba") ? null : "Message must start with 'ba'"
+                    )
+            )
             .build();
 
         assertNull(
@@ -115,7 +128,8 @@ public class BuilderTests {
                         4,
                         Instant.now()
                     ),
-                    Map.of("a", "1", "b", 2, "date", Instant.now())
+                    Map.of("a", "1", "b", 2, "date", Instant.now()),
+                    new TestDelegateObject("bazinga")
                 )
             )
         );
@@ -129,7 +143,8 @@ public class BuilderTests {
         Map<String, Integer> myMapProperty1,
         TestSubStructureMap myMapProperty2,
         TestSubStructure myObjectProperty1,
-        Map<String, Object> myObjectProperty2
+        Map<String, Object> myObjectProperty2,
+        TestDelegateObject myDelegatedProperty
     ) {
     }
 
@@ -143,6 +158,11 @@ public class BuilderTests {
     record TestSubStructureMap(
         int a,
         int b
+    ) {
+    }
+
+    record TestDelegateObject(
+        String message
     ) {
     }
 }

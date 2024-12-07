@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public abstract class BasicPropertySpecBuilder<T> extends PropertySpecBuilder<T, T> {
     private final BasicPropertySpecFactory<T> factory;
 
-    public BasicPropertySpecBuilder(java.lang.String key, BasicPropertySpecFactory<T> factory) {
+    public BasicPropertySpecBuilder(@NotNull java.lang.String key, BasicPropertySpecFactory<T> factory) {
         super(key);
         this.factory = factory;
     }

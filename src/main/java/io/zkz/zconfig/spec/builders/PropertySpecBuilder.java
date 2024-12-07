@@ -1,5 +1,6 @@
 package io.zkz.zconfig.spec.builders;
 
+import io.zkz.zconfig.conversion.Serializer;
 import io.zkz.zconfig.spec.PropertySpec;
 import io.zkz.zconfig.validation.Validator;
 import org.jetbrains.annotations.NotNull;
@@ -10,18 +11,28 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public abstract class PropertySpecBuilder<SerializedType, ActualType> {
-    protected final String key;
+    protected @NotNull String key;
     protected boolean optional = false;
     protected @Nullable String comment;
     protected @Nullable Supplier<ActualType> defaultValueSupplier;
     protected final List<Validator<ActualType>> validators = new ArrayList<>();
 
-    protected PropertySpecBuilder(String key) {
+    protected PropertySpecBuilder(@NotNull String key) {
         this.key = key;
+    }
+
+    public PropertySpecBuilder<SerializedType, ActualType> key(@NotNull String key) {
+        this.key = key;
+        return this;
     }
 
     public PropertySpecBuilder<SerializedType, ActualType> optional() {
         this.optional = true;
+        return this;
+    }
+
+    public PropertySpecBuilder<SerializedType, ActualType> optional(boolean optional) {
+        this.optional = optional;
         return this;
     }
 
@@ -37,6 +48,11 @@ public abstract class PropertySpecBuilder<SerializedType, ActualType> {
 
     public PropertySpecBuilder<SerializedType, ActualType> validator(Validator<ActualType> validator) {
         this.validators.add(validator);
+        return this;
+    }
+
+    public PropertySpecBuilder<SerializedType, ActualType> validators(Collection<? extends Validator<ActualType>> validators) {
+        this.validators.addAll(validators);
         return this;
     }
 
@@ -82,6 +98,20 @@ public abstract class PropertySpecBuilder<SerializedType, ActualType> {
         public ObjectPropertySpecBuilder<Object> Object(String key, @NotNull List<PropertySpec<?, ?>> properties) {
             return new ObjectPropertySpecBuilder<>(key, Object.class, properties);
         }
+
+        public <SerializedType, ActualType> SimpleDelegatedPropertySpecBuilder<SerializedType, ActualType> Delegated(
+            @NotNull String key,
+            @NotNull Class<ActualType> actualType,
+            @NotNull Serializer<SerializedType, ActualType> serializer,
+            @NotNull Function<SubTypes, PropertySpecBuilder<SerializedType, SerializedType>> delegateFactory
+        ) {
+            return new SimpleDelegatedPropertySpecBuilder<>(
+                key,
+                actualType,
+                serializer,
+                delegateFactory
+            );
+        }
     }
 
     public static class SubTypes {
@@ -123,6 +153,19 @@ public abstract class PropertySpecBuilder<SerializedType, ActualType> {
 
         public ObjectPropertySpecBuilder<Object> Object(@NotNull List<PropertySpec<?, ?>> properties) {
             return new ObjectPropertySpecBuilder<>("value", Object.class, properties);
+        }
+
+        public <SerializedType, ActualType> SimpleDelegatedPropertySpecBuilder<SerializedType, ActualType> Delegated(
+            @NotNull Class<ActualType> actualType,
+            @NotNull Serializer<SerializedType, ActualType> serializer,
+            @NotNull Function<SubTypes, PropertySpecBuilder<SerializedType, SerializedType>> delegateFactory
+        ) {
+            return new SimpleDelegatedPropertySpecBuilder<>(
+                "value",
+                actualType,
+                serializer,
+                delegateFactory
+            );
         }
     }
 }

@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-public abstract class SimpleDelegatedPropertySpec<SerializedType, ActualType> implements PropertySpec<SerializedType, ActualType> {
+public class SimpleDelegatedPropertySpec<SerializedType, ActualType> implements PropertySpec<SerializedType, ActualType> {
     private final @NotNull Class<ActualType> actualType;
     private final @NotNull Serializer<SerializedType, ActualType> serializer;
     private final @NotNull PropertySpec<SerializedType, SerializedType> delegate;
