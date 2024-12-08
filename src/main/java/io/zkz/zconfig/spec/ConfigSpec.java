@@ -10,6 +10,7 @@ public class ConfigSpec extends ObjectPropertySpec<Object> {
         super(
             "root",
             null,
+            null,
             false,
             null,
             List.of(),
@@ -18,11 +19,11 @@ public class ConfigSpec extends ObjectPropertySpec<Object> {
         );
     }
 
-    public static ConfigSpecBuilder builder() {
-        return new ConfigSpecBuilder();
+    public ConfigSpec(ObjectPropertySpec<Object> objectSpec) {
+        this(objectSpec.getProperties());
     }
 
-    public static ConfigSpec fromAnnotations(Class<?> clazz) {
-        return null;
+    public static ConfigSpecBuilder builder() {
+        return new ConfigSpecBuilder();
     }
 }

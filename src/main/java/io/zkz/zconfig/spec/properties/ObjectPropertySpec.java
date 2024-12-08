@@ -14,11 +14,12 @@ import java.util.function.Supplier;
 
 import static io.zkz.zconfig.utils.ErrorUtils.tagError;
 
-public class ObjectPropertySpec<T> extends BasicPropertySpec<T> {
+public class ObjectPropertySpec<T> extends PrimitivePropertySpec<T> {
     private final List<PropertySpec<?, ?>> properties = new ArrayList<>();
 
     public ObjectPropertySpec(
         @NotNull String key,
+        @Nullable String storageKey,
         @Nullable String comment,
         boolean optional,
         @Nullable Supplier<T> defaultValueProvider,
@@ -26,19 +27,24 @@ public class ObjectPropertySpec<T> extends BasicPropertySpec<T> {
         @NotNull List<PropertySpec<?, ?>> properties,
         @NotNull Class<T> type
     ) {
-        super(key, comment, optional, defaultValueProvider, validators, type);
+        super(key, storageKey, comment, optional, defaultValueProvider, validators, type);
         this.properties.addAll(properties);
     }
 
     public ObjectPropertySpec<Object> untyped(
         @NotNull String key,
+        @Nullable String storageKey,
         @Nullable String comment,
         boolean optional,
         @Nullable Supplier<Object> defaultValueProvider,
         @NotNull List<Validator<Object>> validators,
         @NotNull List<PropertySpec<?, ?>> properties
     ) {
-        return new ObjectPropertySpec<>(key, comment, optional, defaultValueProvider, validators, properties, Object.class);
+        return new ObjectPropertySpec<>(key, storageKey, comment, optional, defaultValueProvider, validators, properties, Object.class);
+    }
+
+    public List<PropertySpec<?,?>> getProperties() {
+        return List.copyOf(properties);
     }
 
     @Override

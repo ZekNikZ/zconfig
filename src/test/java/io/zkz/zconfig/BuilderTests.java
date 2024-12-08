@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class BuilderTests {
     @Test
-    public void builderTest() throws NoSuchFieldException {
+    public void builderTest() {
 //        ListPropertySpec<Integer> spec = ListPropertySpec.typed(
 //            "test",
 //            null,
@@ -97,17 +97,19 @@ public class BuilderTests {
                     )
             )
             .addProperty(type ->
-                type.Delegated("myDelegatedProperty", TestDelegateObject.class, new Serializer<>() {
-                        @Override
-                        public TestDelegateObject deserialize(String value) {
-                            return new TestDelegateObject(value);
-                        }
+                type.Basic("myDelegatedProperty", String.class, TestDelegateObject.class,
+                        new Serializer<>() {
+                            @Override
+                            public TestDelegateObject deserialize(String value) {
+                                return new TestDelegateObject(value);
+                            }
 
-                        @Override
-                        public String serialize(TestDelegateObject value) {
-                            return value.message();
+                            @Override
+                            public String serialize(TestDelegateObject value) {
+                                return value.message();
+                            }
                         }
-                    }, PropertySpecBuilder.SubTypes::String)
+                    )
                     .validator(
                         x -> x.message.startsWith("ba") ? null : "Message must start with 'ba'"
                     )

@@ -1,62 +1,110 @@
 package io.zkz.zconfig.spec.properties;
 
 import io.zkz.zconfig.conversion.Serializer;
+import io.zkz.zconfig.spec.PropertySpec;
 import io.zkz.zconfig.validation.Validator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 
-public class BasicPropertySpec<T> extends AbstractPropertySpec<T, T> {
+public class BasicPropertySpec<SerializedType, ActualType> implements PropertySpec<SerializedType, ActualType> {
+    private final @NotNull String key;
+    private final @NotNull String storageKey;
+    private final @Nullable String comment;
+    private final boolean optional;
+    private final @Nullable Supplier<ActualType> defaultValueProvider;
+    private final List<Validator<ActualType>> validators = new ArrayList<>();
+
+    private final Class<SerializedType> serializedType;
+    private final Class<ActualType> actualType;
+    private final Serializer<SerializedType, ActualType> serializer;
+
     public BasicPropertySpec(
         @NotNull String key,
+        @Nullable String storageKey,
         @Nullable String comment,
         boolean optional,
-        @Nullable Supplier<T> defaultValueProvider,
-        @NotNull Collection<? extends Validator<T>> validators,
-        @NotNull Class<T> type
+        @Nullable Supplier<ActualType> defaultValueProvider,
+        @NotNull Collection<? extends Validator<ActualType>> validators,
+        @NotNull Class<SerializedType> serializedType,
+        @NotNull Class<ActualType> actualType,
+        @NotNull Serializer<SerializedType, ActualType> serializer
     ) {
-        super(key, comment, optional, defaultValueProvider, validators, type, type, Serializer.identity());
+        this.key = key;
+        this.storageKey = storageKey != null ? storageKey : key;
+        this.comment = comment;
+        this.optional = optional;
+        this.defaultValueProvider = defaultValueProvider;
+        this.serializedType = serializedType;
+        this.actualType = actualType;
+        this.serializer = serializer;
+        this.validators.addAll(validators);
     }
 
-    public static BasicPropertySpec<String> String(
-        @NotNull String key,
-        @Nullable String comment,
-        boolean optional,
-        @Nullable Supplier<String> defaultValueProvider,
-        @NotNull Collection<? extends Validator<String>> validators
-    ) {
-        return new BasicPropertySpec<>(key, comment, optional, defaultValueProvider, validators, String.class);
+    @Override
+    public @NotNull Class<SerializedType> getSerializedType() {
+        return this.serializedType;
     }
 
-    public static BasicPropertySpec<Integer> Integer(
-        @NotNull String key,
-        @Nullable String comment,
-        boolean optional,
-        @Nullable Supplier<Integer> defaultValueProvider,
-        @NotNull Collection<? extends Validator<Integer>> validators
-    ) {
-        return new BasicPropertySpec<>(key, comment, optional, defaultValueProvider, validators, Integer.class);
+    @Override
+    public @NotNull Class<ActualType> getActualType() {
+        return this.actualType;
     }
 
-    public static BasicPropertySpec<Double> Double(
-        @NotNull String key,
-        @Nullable String comment,
-        boolean optional,
-        @Nullable Supplier<Double> defaultValueProvider,
-        @NotNull Collection<? extends Validator<Double>> validators
-    ) {
-        return new BasicPropertySpec<>(key, comment, optional, defaultValueProvider, validators, Double.class);
+    @Override
+    public @NotNull Serializer<SerializedType, ActualType> getSerializer() {
+        return this.serializer;
     }
 
-    public static BasicPropertySpec<Boolean> Boolean(
-        @NotNull String key,
-        @Nullable String comment,
-        boolean optional,
-        @Nullable Supplier<Boolean> defaultValueProvider,
-        @NotNull Collection<? extends Validator<Boolean>> validators
-    ) {
-        return new BasicPropertySpec<>(key, comment, optional, defaultValueProvider, validators, Boolean.class);
+    @Override
+    public @NotNull String getKey() {
+        return this.key;
+    }
+
+    @Override
+    public @NotNull String getStorageKey() {
+        return this.storageKey;
+    }
+
+    @Override
+    public @Nullable String getComment() {
+        return this.comment;
+    }
+
+    @Override
+    public boolean isOptional() {
+        return this.optional;
+    }
+
+    @Override
+    public boolean hasDefaultValue() {
+        return this.defaultValueProvider != null;
+    }
+
+    @Override
+    public ActualType getDefaultValue() {
+        return Objects.requireNonNull(this.defaultValueProvider).get();
+    }
+
+    @Override
+    public List<Validator<ActualType>> getValidators() {
+        return this.validators;
+    }
+
+    @Override
+    public @Nullable String validate(ActualType value) {
+        for (Validator<ActualType> validator : this.validators) {
+            String error = validator.validate(value);
+            if (error != null) {
+                return error;
+            }
+        }
+
+        return null;
     }
 }

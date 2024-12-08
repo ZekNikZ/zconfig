@@ -1,4 +1,4 @@
-package io.zkz.zconfig.annotation;
+package io.zkz.zconfig.binding.annotation;
 
 import io.zkz.zconfig.conversion.Serializer;
 
@@ -13,6 +13,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface Converter {
+public @interface SerializedBy {
     Class<? extends Serializer<?, ?>> value();
 }

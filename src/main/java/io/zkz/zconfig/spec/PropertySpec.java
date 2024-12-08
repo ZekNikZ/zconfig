@@ -10,6 +10,8 @@ import java.util.Collection;
 public interface PropertySpec<SerializedType, ActualType> extends Validator<ActualType> {
     @NotNull String getKey();
 
+    @NotNull String getStorageKey();
+
     @Nullable String getComment();
 
     boolean isOptional();

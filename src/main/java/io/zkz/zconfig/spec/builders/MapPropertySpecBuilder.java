@@ -18,6 +18,7 @@ public class MapPropertySpecBuilder<T> extends PropertySpecBuilder<Map, Map> {
     public MapPropertySpec<T> build() {
         return new MapPropertySpec<>(
             this.key,
+            this.storageKey,
             this.comment,
             this.optional,
             this.defaultValueSupplier,

@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 
 public abstract class PropertySpecBuilder<SerializedType, ActualType> {
     protected @NotNull String key;
+    protected @Nullable String storageKey;
     protected boolean optional = false;
     protected @Nullable String comment;
     protected @Nullable Supplier<ActualType> defaultValueSupplier;
@@ -23,6 +24,11 @@ public abstract class PropertySpecBuilder<SerializedType, ActualType> {
 
     public PropertySpecBuilder<SerializedType, ActualType> key(@NotNull String key) {
         this.key = key;
+        return this;
+    }
+
+    public PropertySpecBuilder<SerializedType, ActualType> storageKey(@NotNull String storageKey) {
+        this.storageKey = storageKey;
         return this;
     }
 
@@ -59,113 +65,110 @@ public abstract class PropertySpecBuilder<SerializedType, ActualType> {
     public abstract PropertySpec<SerializedType, ActualType> build();
 
     public static class Types {
-        public BasicPropertySpecBuilder.String String(String key) {
-            return new BasicPropertySpecBuilder.String(key);
+        public PrimitivePropertySpecBuilder.String String(String key) {
+            return new PrimitivePropertySpecBuilder.String(key);
         }
 
-        public BasicPropertySpecBuilder.Integer Integer(String key) {
-            return new BasicPropertySpecBuilder.Integer(key);
+        public PrimitivePropertySpecBuilder.Integer Integer(String key) {
+            return new PrimitivePropertySpecBuilder.Integer(key);
         }
 
-        public BasicPropertySpecBuilder.Double Double(String key) {
-            return new BasicPropertySpecBuilder.Double(key);
+        public PrimitivePropertySpecBuilder.Double Double(String key) {
+            return new PrimitivePropertySpecBuilder.Double(key);
         }
 
-        public BasicPropertySpecBuilder.Boolean Boolean(String key) {
-            return new BasicPropertySpecBuilder.Boolean(key);
+        public PrimitivePropertySpecBuilder.Boolean Boolean(String key) {
+            return new PrimitivePropertySpecBuilder.Boolean(key);
         }
 
         public DateTimePropertySpecBuilder DateTime(String key) {
             return new DateTimePropertySpecBuilder(key);
         }
 
-        public <T> ListPropertySpecBuilder<T> List(String key, Function<SubTypes, PropertySpecBuilder<?, T>> valueSpec) {
+        public <S, A> ListPropertySpecBuilder<A> List(String key, Function<SubTypes, PropertySpecBuilder<S, A>> valueSpec) {
             return new ListPropertySpecBuilder<>(key, valueSpec.apply(new SubTypes()).build());
         }
 
-        public <T> MapPropertySpecBuilder<T> Map(String key, Function<SubTypes, PropertySpecBuilder<?, T>> valueSpec) {
+        public <S, A> ListPropertySpecBuilder<A> List(String key, PropertySpec<S, A> valueSpec) {
+            return new ListPropertySpecBuilder<>(key, valueSpec);
+        }
+
+        public <S, A> MapPropertySpecBuilder<A> Map(String key, Function<SubTypes, PropertySpecBuilder<S, A>> valueSpec) {
             return new MapPropertySpecBuilder<>(key, valueSpec.apply(new SubTypes()).build());
+        }
+
+        public <S, A> MapPropertySpecBuilder<A> Map(String key, PropertySpec<S, A> valueSpec) {
+            return new MapPropertySpecBuilder<>(key, valueSpec);
         }
 
         public ObjectPropertySpecBuilder<Object> Object(String key) {
             return new ObjectPropertySpecBuilder<>(key, Object.class, List.of());
         }
 
-        public <T> ObjectPropertySpecBuilder<T> Object(String key, Class<T> type) {
-            throw new RuntimeException("TODO");
+        public <T> ObjectPropertySpecBuilder<T> Object(String key, @NotNull Class<T> type, @NotNull List<PropertySpec<?, ?>> properties) {
+            return new ObjectPropertySpecBuilder<>(key, type, properties);
         }
 
         public ObjectPropertySpecBuilder<Object> Object(String key, @NotNull List<PropertySpec<?, ?>> properties) {
             return new ObjectPropertySpecBuilder<>(key, Object.class, properties);
         }
 
-        public <SerializedType, ActualType> SimpleDelegatedPropertySpecBuilder<SerializedType, ActualType> Delegated(
-            @NotNull String key,
-            @NotNull Class<ActualType> actualType,
-            @NotNull Serializer<SerializedType, ActualType> serializer,
-            @NotNull Function<SubTypes, PropertySpecBuilder<SerializedType, SerializedType>> delegateFactory
-        ) {
-            return new SimpleDelegatedPropertySpecBuilder<>(
-                key,
-                actualType,
-                serializer,
-                delegateFactory
-            );
+        public <S, A> BasicPropertySpecBuilder<S, A> Basic(String key, Class<S> serializedType, Class<A> actualType, Serializer<S, A> serializer) {
+            return new BasicPropertySpecBuilder<>(key, serializedType, actualType, serializer);
         }
     }
 
     public static class SubTypes {
-        public BasicPropertySpecBuilder.String String() {
-            return new BasicPropertySpecBuilder.String("value");
+        public PrimitivePropertySpecBuilder.String String() {
+            return new PrimitivePropertySpecBuilder.String("value");
         }
 
-        public BasicPropertySpecBuilder.Integer Integer() {
-            return new BasicPropertySpecBuilder.Integer("value");
+        public PrimitivePropertySpecBuilder.Integer Integer() {
+            return new PrimitivePropertySpecBuilder.Integer("value");
         }
 
-        public BasicPropertySpecBuilder.Double Double() {
-            return new BasicPropertySpecBuilder.Double("value");
+        public PrimitivePropertySpecBuilder.Double Double() {
+            return new PrimitivePropertySpecBuilder.Double("value");
         }
 
-        public BasicPropertySpecBuilder.Boolean Boolean() {
-            return new BasicPropertySpecBuilder.Boolean("value");
+        public PrimitivePropertySpecBuilder.Boolean Boolean() {
+            return new PrimitivePropertySpecBuilder.Boolean("value");
         }
 
         public DateTimePropertySpecBuilder DateTime() {
             return new DateTimePropertySpecBuilder("value");
         }
 
-        public <T> ListPropertySpecBuilder<T> List(Function<SubTypes, PropertySpecBuilder<?, T>> valueSpec) {
+        public <S, A> ListPropertySpecBuilder<A> List(Function<SubTypes, PropertySpecBuilder<S, A>> valueSpec) {
             return new ListPropertySpecBuilder<>("value", valueSpec.apply(new SubTypes()).build());
         }
 
-        public <T> MapPropertySpecBuilder<T> Map(Function<SubTypes, PropertySpecBuilder<?, T>> valueSpec) {
+        public <S, A> ListPropertySpecBuilder<A> List(PropertySpec<S, A> valueSpec) {
+            return new ListPropertySpecBuilder<>("value", valueSpec);
+        }
+
+        public <S, A> MapPropertySpecBuilder<A> Map(Function<SubTypes, PropertySpecBuilder<S, A>> valueSpec) {
             return new MapPropertySpecBuilder<>("value", valueSpec.apply(new SubTypes()).build());
+        }
+
+        public <S, A> MapPropertySpecBuilder<A> Map(PropertySpec<S, A> valueSpec) {
+            return new MapPropertySpecBuilder<>("value", valueSpec);
         }
 
         public ObjectPropertySpecBuilder<Object> Object() {
             return new ObjectPropertySpecBuilder<>("value", Object.class, List.of());
         }
 
-        public <T> ObjectPropertySpecBuilder<T> Object(Class<T> type) {
-            throw new RuntimeException("TODO");
+        public <T> ObjectPropertySpecBuilder<T> Object(@NotNull Class<T> type, @NotNull List<PropertySpec<?, ?>> properties) {
+            return new ObjectPropertySpecBuilder<>("value", type, properties);
         }
 
         public ObjectPropertySpecBuilder<Object> Object(@NotNull List<PropertySpec<?, ?>> properties) {
             return new ObjectPropertySpecBuilder<>("value", Object.class, properties);
         }
 
-        public <SerializedType, ActualType> SimpleDelegatedPropertySpecBuilder<SerializedType, ActualType> Delegated(
-            @NotNull Class<ActualType> actualType,
-            @NotNull Serializer<SerializedType, ActualType> serializer,
-            @NotNull Function<SubTypes, PropertySpecBuilder<SerializedType, SerializedType>> delegateFactory
-        ) {
-            return new SimpleDelegatedPropertySpecBuilder<>(
-                "value",
-                actualType,
-                serializer,
-                delegateFactory
-            );
+        public <S, A> BasicPropertySpecBuilder<S, A> Basic(Class<S> serializedType, Class<A> actualType, Serializer<S, A> serializer) {
+            return new BasicPropertySpecBuilder<>("value", serializedType, actualType, serializer);
         }
     }
 }

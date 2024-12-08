@@ -33,6 +33,7 @@ public class ListPropertySpecBuilder<T> extends PropertySpecBuilder<List, List> 
     public ListPropertySpec<T> build() {
         return new ListPropertySpec<>(
             this.key,
+            this.storageKey,
             this.comment,
             this.optional,
             this.defaultValueSupplier,

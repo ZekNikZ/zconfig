@@ -27,6 +27,7 @@ public class ObjectPropertySpecBuilder<T> extends PropertySpecBuilder<T, T> {
     public ObjectPropertySpec<T> build() {
         return new ObjectPropertySpec<>(
             this.key,
+            this.storageKey,
             this.comment,
             this.optional,
             this.defaultValueSupplier,

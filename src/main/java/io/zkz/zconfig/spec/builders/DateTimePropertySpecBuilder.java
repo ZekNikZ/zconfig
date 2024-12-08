@@ -28,6 +28,7 @@ public class DateTimePropertySpecBuilder extends PropertySpecBuilder<String, Ins
     public DateTimePropertySpec build() {
         return new DateTimePropertySpec(
             this.key,
+            this.storageKey,
             this.comment,
             this.optional,
             this.defaultValueSupplier,

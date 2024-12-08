@@ -13,11 +13,12 @@ import java.util.function.Supplier;
 import static io.zkz.zconfig.utils.ErrorUtils.tagError;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class ListPropertySpec<T> extends BasicPropertySpec<List> {
+public class ListPropertySpec<T> extends PrimitivePropertySpec<List> {
     final PropertySpec<?, T> valueSpec;
 
     public ListPropertySpec(
         @NotNull String key,
+        @Nullable String storageKey,
         @Nullable String comment,
         boolean optional,
         @Nullable Supplier<List> defaultValueProvider,
@@ -26,6 +27,7 @@ public class ListPropertySpec<T> extends BasicPropertySpec<List> {
     ) {
         super(
             key,
+            storageKey,
             comment,
             optional,
             defaultValueProvider,
@@ -37,6 +39,7 @@ public class ListPropertySpec<T> extends BasicPropertySpec<List> {
 
     public static <T> ListPropertySpec<T> typed(
         @NotNull String key,
+        @Nullable String storageKey,
         @Nullable String comment,
         boolean optional,
         @Nullable Supplier<List<T>> defaultValueProvider,
@@ -45,6 +48,7 @@ public class ListPropertySpec<T> extends BasicPropertySpec<List> {
     ) {
         return new ListPropertySpec<>(
             key,
+            storageKey,
             comment,
             optional,
             () -> defaultValueProvider != null ? defaultValueProvider.get() : null,

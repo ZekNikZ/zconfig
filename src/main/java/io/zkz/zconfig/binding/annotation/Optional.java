@@ -1,4 +1,4 @@
-package io.zkz.zconfig.annotation;
+package io.zkz.zconfig.binding.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,10 +6,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Change the key of this property. Without this annotation, the name of the field is used.
+ * Property is optional (nullable). Will throw if the corresponding field is not-nullable.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface Key {
-    String value();
+public @interface Optional {
 }

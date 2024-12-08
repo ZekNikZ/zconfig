@@ -1,4 +1,4 @@
-package io.zkz.zconfig.annotation;
+package io.zkz.zconfig.binding.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,10 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Restricts the string value to match a Regex.
+ * Change the key of this property. Without this annotation, the name of the field is used.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface Regex {
+public @interface Key {
     String value();
 }

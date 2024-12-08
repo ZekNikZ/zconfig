@@ -1,12 +1,11 @@
 package io.zkz.zconfig.spec.properties;
 
-import io.zkz.zconfig.annotation.Exclude;
+import io.zkz.zconfig.binding.annotation.Exclude;
 import io.zkz.zconfig.spec.PropertySpec;
 import io.zkz.zconfig.validation.Validator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InaccessibleObjectException;
 import java.util.*;
@@ -15,11 +14,12 @@ import java.util.function.Supplier;
 import static io.zkz.zconfig.utils.ErrorUtils.tagError;
 
 @SuppressWarnings({"rawtypes"})
-public class MapPropertySpec<T> extends BasicPropertySpec<Map> {
+public class MapPropertySpec<T> extends PrimitivePropertySpec<Map> {
     final PropertySpec<?, T> valueSpec;
 
     public MapPropertySpec(
         @NotNull String key,
+        @Nullable String storageKey,
         @Nullable String comment,
         boolean optional,
         @Nullable Supplier<Map> defaultValueProvider,
@@ -28,6 +28,7 @@ public class MapPropertySpec<T> extends BasicPropertySpec<Map> {
     ) {
         super(
             key,
+            storageKey,
             comment,
             optional,
             defaultValueProvider,
@@ -39,6 +40,7 @@ public class MapPropertySpec<T> extends BasicPropertySpec<Map> {
 
     public static <T> MapPropertySpec<T> typed(
         @NotNull String key,
+        @Nullable String storageKey,
         @Nullable String comment,
         boolean optional,
         @Nullable Supplier<Map<?, T>> defaultValueProvider,
@@ -47,6 +49,7 @@ public class MapPropertySpec<T> extends BasicPropertySpec<Map> {
     ) {
         return new MapPropertySpec<>(
             key,
+            storageKey,
             comment,
             optional,
             () -> defaultValueProvider != null ? defaultValueProvider.get() : null,
@@ -85,7 +88,7 @@ public class MapPropertySpec<T> extends BasicPropertySpec<Map> {
             Field[] fields = obj.getClass().getDeclaredFields();
             Map<String, Object> map = new HashMap<>();
             for (Field field : fields) {
-                if (Arrays.stream(field.getDeclaredAnnotations()).anyMatch(annotation -> annotation instanceof Exclude)) {
+                if (field.getDeclaredAnnotation(Exclude.class) != null) {
                     continue;
                 }
                 try {

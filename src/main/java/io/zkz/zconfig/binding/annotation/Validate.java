@@ -1,4 +1,6 @@
-package io.zkz.zconfig.annotation;
+package io.zkz.zconfig.binding.annotation;
+
+import io.zkz.zconfig.validation.Validator;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,12 +8,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Restricts the range of legal double values.
+ * Provides a validator function for the property.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface DoubleRange {
-    double min() default Double.MIN_VALUE;
-
-    double max() default Double.MIN_VALUE;
+public @interface Validate {
+    Class<? extends Validator<?>> value();
 }
